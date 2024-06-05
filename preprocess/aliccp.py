@@ -13,11 +13,11 @@ from sklearn.model_selection import train_test_split
 
 random.seed(2022)
 np.random.seed(2022)
-sample_skeleton_train_path = './sample_skeleton_train.csv'
-common_features_train_path = './common_features_train.csv'
-sample_skeleton_test_path = './sample_skeleton_test.csv'
-common_features_test_path = './common_features_test.csv'
-save_path = "./"
+sample_skeleton_train_path = '../mtl/sample_skeleton_train.csv'
+common_features_train_path = '../mtl/common_features_train.csv'
+sample_skeleton_test_path = '../mtl/sample_skeleton_test.csv'
+common_features_test_path = '../mtl/common_features_test.csv'
+save_path = "../mtl/"
 write_features_map_path = save_path + 'features_map.pkl'
 write_features_path = save_path + 'all_features'
 sparse_columns = ['101', '121', '122', '124', '125', '126', '127', '128', '129', '205', '206', '207', '210', '216', '508', '509', '702', '853', '301', '109_14', '110_14', '127_14', '150_14']
