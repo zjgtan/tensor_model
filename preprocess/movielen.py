@@ -89,10 +89,11 @@ with tf.io.TFRecordWriter("./output/ml-1m/movielens.tfrecord") as tfd_writer:
                 record.setdefault(slot_name, [])
                 record[slot_name].append(slot_idx)
 
-            record["label"] = [label]
+            record["label"] = [float(label)]
 
-            for slot_name in ["gender", "age", "job", "zipcode", "year", "genre", "label"]:
+            for slot_name in ["gender", "age", "job", "zipcode", "year", "genre"]:
                 record[slot_name] = tf.train.Feature(int64_list=tf.train.Int64List(value=record[slot_name]))
+            record["label"] = tf.train.Feature(float_list=tf.train.FloatList(value=record["label"]))
 
             example = tf.train.Example(features=tf.train.Features(feature=record))
 

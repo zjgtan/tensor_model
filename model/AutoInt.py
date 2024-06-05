@@ -2,11 +2,16 @@ import tensorflow as tf
 from tensorflow import keras
 
 class AutoInt(keras.Model):
-    def __init__(self, vocab_size, emb_size, self_attention_linear_projection_num_units, self_attention_num_heads):
+    def __init__(self, vocab_size, emb_size, self_attention_linear_projection_num_units, self_attention_num_heads, fix_len_feature_columns, var_len_feature_columns):
         super().__init__()
 
         self.self_attention_linear_projection_num_units = self_attention_linear_projection_num_units
         self.embedding_layer = keras.layers.Embedding(input_dim=vocab_size, output_dim=emb_size)
+
+        self.fix_len_feature_columns = fix_len_feature_columns
+        self.var_len_feature_columns = var_len_feature_columns
+
+        self.field_size = len(self.fix_len_feature_columns) + len(self.var_len_feature_columns)
 
         self.Q = keras.layers.Dense(self_attention_linear_projection_num_units, activation="relu")
         self.K = keras.layers.Dense(self_attention_linear_projection_num_units, activation="relu")
@@ -37,25 +42,22 @@ class AutoInt(keras.Model):
 
         return outputs
 
-    def call(self, inputs, fix_len_feature_columns, var_len_feature_columns):
-
-        field_size = len(fix_len_feature_columns) + len(var_len_feature_columns)
-
+    def call(self, inputs):
         embedding_list = []
         # 向量化
-        for feature_column in fix_len_feature_columns:
+        for feature_column in self.fix_len_feature_columns:
             embedding_list.append(self.embedding_layer(inputs[feature_column]))
 
-        for feature_column in var_len_feature_columns:
-            embedding = tf.reduce_mean(self.embedding_layer(inputs[feature_column]), axis=1).to_tensor()
+        for feature_column in self.var_len_feature_columns:
+            embedding = self.embedding_layer(inputs[feature_column])
+            embedding = tf.reduce_mean(embedding, axis=2).to_tensor()
             embedding_list.append(embedding)
-
 
         embedding = tf.concat(embedding_list, axis=1)
 
         # transformer
         self_attention_embedding_output = self.multi_head_self_attention(embedding)
-        merged_output = tf.reshape(self_attention_embedding_output, shape=[-1, field_size * self.self_attention_linear_projection_num_units])
+        merged_output = tf.reshape(self_attention_embedding_output, shape=[-1, self.field_size * self.self_attention_linear_projection_num_units])
 
         # output 
         logits = self.pred_layer(merged_output)
