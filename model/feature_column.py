@@ -1,6 +1,6 @@
 
 class SparseColumn:
-    def __init__(self, name, group_name):
+    def __init__(self, name, group):
         """稀疏特征列
         name: 特征名
         vocabulary_size: 词表大小
@@ -8,7 +8,7 @@ class SparseColumn:
         group_name: 特征组
         """
         self.name = name
-        self.group_name = group_name
+        self.group = group
 
 
 class VarLenColumn:
