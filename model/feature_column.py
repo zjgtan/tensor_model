@@ -1,6 +1,6 @@
 
 class SparseColumn:
-    def __init__(self, name, vocabulary_size, embedding_dim, group_name):
+    def __init__(self, name, group_name):
         """稀疏特征列
         name: 特征名
         vocabulary_size: 词表大小
