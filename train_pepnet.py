@@ -30,6 +30,16 @@ def parse_example(record, feature_map):
 
     return parsed_example
 
+def train_epoch(model, dataset, optimizer):
+
+    for idx, batch in enumerate(dataset):
+        with tf.GradientTape() as tape:
+            logits = 
+
+    
+    
+
+
 
 
 if __name__ == "__main__":
