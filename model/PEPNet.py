@@ -1,6 +1,6 @@
 import tensorflow as tf
 from tensorflow import keras
-from feature_column import *
+from model.feature_column import *
 
 
 """
