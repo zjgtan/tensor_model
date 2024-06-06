@@ -82,7 +82,7 @@ def preprocess_data(mode='train'):
 
                 example = tf.train.Example(features=tf.train.Features(feature=tf_record))
 
-                tfd_writer.write(example.SerialzeToString())
+                tfd_writer.write(example.SerializeToString())
 
 if __name__ == "__main__":
     preprocess_data(mode='train')
