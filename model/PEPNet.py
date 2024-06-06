@@ -30,15 +30,16 @@ class GateNU(keras.Model):
 
 
 class EPNet(keras.Model):
-    def __init__(self, gate_hidden_dim, embedding_dim, feature_group_num_dict):
+    def __init__(self, gate_hidden_dim, embedding_dim, feature_map):
         super().__init__()
-        self.feature_group_num_dict = feature_group_num_dict
-        self.gate_unit = GateNU(gate_hidden_dim, embedding_dim * (feature_group_num_dict["general"] + feature_group_num_dict["domain"]))
+        self.feature_map = feature_map
+        self.slot_num = sum([1 for feat, col in self.feature_map.items() if col.group in ["general", "user", "item"]])
+        self.gate_unit = GateNU(gate_hidden_dim, embedding_dim * slot_num)
 
     def call(self, domain_embedding, general_embedding):
         input_embedding = tf.concat([domain_embedding, tf.stop_gradient(general_embedding)], axis=-1)
         gate = self.gate_unit(input_embedding)
-        output = tf.tile(gate, [1, len(self.feature_map)]) * general_embedding
+        output = gate * general_embedding
         return output
 
 
