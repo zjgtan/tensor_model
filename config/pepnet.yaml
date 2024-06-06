@@ -1,0 +1,59 @@
+feature_map:
+  101:
+    type: sparse
+    group: user
+  109_14:
+    type: sparse
+    group: general
+  110_14:
+    type: sparse
+    group: general
+  127_14:
+    type: sparse
+    group: general
+  150_14:
+    type: sparse
+    group: general
+  121:
+    type: sparse
+    group: user
+  122:
+    type: sparse
+    group: user
+  124:
+    type: sparse
+    group: user
+  125:
+    type: sparse
+    group: user
+  126:
+    type: sparse
+    group: user
+  127:
+    type: sparse
+    group: user
+  128:
+    type: sparse
+    group: user
+  129:
+    type: sparse
+    group: user
+  205:
+    type: sparse
+    group: item
+  206:
+    type: sparse
+    group: item
+  207:
+    type: sparse
+    group: item
+  210:
+    type: sparse
+    group: item
+  216:
+    type: sparse
+    group: item
+embedding_dim: 4
+task_num: 2
+dnn_hidden_units: [64, 64, 64]
+gate_hidden_dim: 64
