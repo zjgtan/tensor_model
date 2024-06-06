@@ -12,7 +12,7 @@ class SparseColumn:
 
 
 class VarLenColumn:
-    def __init__(self, name, vocabulary_size, embedding_dim, max_len, group_name):
+    def __init__(self, name, group):
         """稀疏特征列
         name: 特征名
         vocabulary_size: 词表大小
@@ -21,10 +21,7 @@ class VarLenColumn:
         group_name: 特征组
         """
         self.name = name
-        self.max_len = max_len
-        self.vocabulary_size = vocabulary_size
-        self.group_name = group_name
-        self.embedding_dim = embedding_dim
+        self.group = group
 
 
 
@@ -38,5 +35,7 @@ def get_feature_map_from_yaml_config(yaml_config):
 
         if type == "sparse":
             feature_map[name] = SparseColumn(name, group)
+        elif type == "var":
+            feature_map[name] = VarLenColumn(name, group)
 
     return feature_map
