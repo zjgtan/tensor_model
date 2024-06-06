@@ -106,10 +106,10 @@ class PEPNet(keras.Model):
 
         return embedding_dict
 
-    def concat_grouped_embedding(self, embedding_dict, group_name="general"):
+    def concat_grouped_embedding(self, embedding_dict, group="general"):
         embedding_list = []
         for name, feature_columnn in self.feature_map.items():
-            if feature_columnn.group_name == group_name or group_name=="general":
+            if feature_columnn.group == group or (group=="general" and feature_columnn.group != "domain"):
                 embedding_list.append(embedding_dict[name])
 
         concated_embedding = tf.concat(embedding_list, axis=-1)
@@ -120,15 +120,15 @@ class PEPNet(keras.Model):
         # 查embeddng
         embedding_dict = self.embedding_lookup(inputs)
 
-        general_embedding = self.concat_grouped_embedding(embedding_dict, group_name="general")
+        general_embedding = self.concat_grouped_embedding(embedding_dict, group="general")
 
-        domain_embedding = self.concat_grouped_embedding(embedding_dict, group_name="domain")
+        domain_embedding = self.concat_grouped_embedding(embedding_dict, group="domain")
 
         epnet_embedding = self.epnet(domain_embedding, general_embedding)
 
         # ppnet input
-        user_embedding = self.concat_grouped_embedding(embedding_dict, group_name="user")
-        item_embedding = self.concat_grouped_embedding(embedding_dict, group_name="item")
+        user_embedding = self.concat_grouped_embedding(embedding_dict, group="user")
+        item_embedding = self.concat_grouped_embedding(embedding_dict, group="item")
 
         logits = self.ppnet(epnet_embedding, user_embedding, item_embedding)
 
@@ -146,3 +146,10 @@ if __name__ == "__main__":
                  task_num=2,
                  dnn_hidden_units=[12, 12, 12],
                  gate_hidden_dim=12)
+
+    
+    batch = {"mid": tf.constant([[1], [2]]),
+             "iid": tf.constant([[1], [2]]),
+             "scene": tf.constant([[1], [2]])}
+
+    print(net(batch))

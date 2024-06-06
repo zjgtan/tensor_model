@@ -15,6 +15,21 @@ alicpp数据格式
 
 """
 
+def parse_example(record, feature_map):
+    schema = {}
+    for feat, col in feature_map.items():
+        if isinstance(col, SparseColumn):
+            schema[feat] = tf.io.FixedLenFeature((1, ), tf.int64)
+        elif isinstance(col, VarLenColumn):
+            schema[feat] = tf.io.RaggedFeature(tf.int64)
+
+    parsed_example = tf.io.parse_single_example(record, schema)
+    for feat, col in feature_map.items():
+        if isinstance(col, VarLenColumn):
+            parsed_example[feat] = tf.ragged.stack([parsed_example[feat]], axis=0)
+
+    return parsed_example
+
 
 
 if __name__ == "__main__":
@@ -29,5 +44,12 @@ if __name__ == "__main__":
 
 
     # 定义输入输出数据流
+    alicpp_train_set = tf.data.TFRecordDataset(["../mtl/train.tfrecord"]).map(lambda record: parse_example(record, feature_map)).batch(100)
+
+    for idx, batch in enumerate(alicpp_train_set):
+        print(batch)
+        break
+
+
 
 
