@@ -6,3 +6,4 @@ embedding_dim: 4
 task_num: 2
 dnn_hidden_units: [64, 64, 64]
 gate_hidden_dim: 64
+vocab_size: 10091403
