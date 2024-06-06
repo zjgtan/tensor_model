@@ -25,6 +25,8 @@ sparse_columns = ['101', '121', '122', '124', '125', '126', '127', '128', '129',
 dense_columns = ['109_14', '110_14', '127_14', '150_14', '508', '509', '702', '853']
 uses_columns = [col for col in sparse_columns] + ['D' + col for col in dense_columns]
 
+padding_idx = 10091379
+
 
 def preprocess_data(mode='train'):
     assert mode in ['train', 'test']
@@ -69,8 +71,11 @@ def preprocess_data(mode='train'):
                 feat_dict["conversion"] = int(line_list[2])
 
                 tf_record = {}
-                for slot in sparse_columns:
-                    tf_record[slot] = tf.train.Feature(int64_list=tf.train.Int64List(value=feat_dict[slot]))
+                for idx, slot in enumerate(sparse_columns):
+                    if slot not in feat_dict:
+                        tf_record[slot] = tf.train.Feature(int64_list=tf.train.Int64List(value=feat_dict[slot]))
+                    else:
+                        tf_record[slot] = tf.train.Feature(int64_list=tf.train.Int64List(value=[padding_idx + idx]))
 
                 tf_record["click"] = tf.train.Feature(float_list=tf.train.FloatList(value=feat_dict["click"]))
                 tf_record["conversion"] = tf.train.Feature(float_list=tf.train.FloatList(value=feat_dict["conversion"]))
