@@ -65,14 +65,14 @@ def preprocess_data(mode='train'):
                     feat, val = feat_val.split('\x03')
                     if field in sparse_columns:
                         feat_dict.setdefault(field, [])
-                        feat_dict[field].append([feat])
+                        feat_dict[field].append([int(feat)])
                 feat_dict.update(common_feat_dict[line_list[3]])
                 feat_dict["click"] = int(line_list[1])
                 feat_dict["conversion"] = int(line_list[2])
 
                 tf_record = {}
                 for idx, slot in enumerate(sparse_columns):
-                    if slot not in feat_dict:
+                    if slot in feat_dict:
                         tf_record[slot] = tf.train.Feature(int64_list=tf.train.Int64List(value=feat_dict[slot]))
                     else:
                         tf_record[slot] = tf.train.Feature(int64_list=tf.train.Int64List(value=[padding_idx + idx]))
