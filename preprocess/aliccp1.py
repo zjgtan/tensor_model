@@ -67,8 +67,8 @@ def preprocess_data(mode='train'):
                         feat_dict.setdefault(field, [])
                         feat_dict[field].append(int(feat))
                 feat_dict.update(common_feat_dict[line_list[3]])
-                feat_dict["click"] = int(line_list[1])
-                feat_dict["conversion"] = int(line_list[2])
+                feat_dict["click"] = [int(line_list[1])]
+                feat_dict["conversion"] = [int(line_list[2])]
 
                 tf_record = {}
                 for idx, slot in enumerate(sparse_columns):
