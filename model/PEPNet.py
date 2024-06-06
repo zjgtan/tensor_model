@@ -34,7 +34,7 @@ class EPNet(keras.Model):
         super().__init__()
         self.feature_map = feature_map
         self.slot_num = sum([1 for feat, col in self.feature_map.items() if col.group in ["general", "user", "item"]])
-        self.gate_unit = GateNU(gate_hidden_dim, embedding_dim * slot_num)
+        self.gate_unit = GateNU(gate_hidden_dim, embedding_dim * self.slot_num)
 
     def call(self, domain_embedding, general_embedding):
         input_embedding = tf.concat([domain_embedding, tf.stop_gradient(general_embedding)], axis=-1)
