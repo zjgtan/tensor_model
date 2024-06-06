@@ -78,30 +78,25 @@ class PPNet(keras.Model):
 
 
 class PEPNet(keras.Model):
-    def __init__(self, feature_map, embedding_dim, task_num, dnn_hidden_units, gate_hidden_dim):
+    def __init__(self, feature_map, vocab_size, embedding_dim, task_num, dnn_hidden_units, gate_hidden_dim):
         super().__init__()
         self.feature_map = feature_map # 包含了模型用到的所有特征列信息
         self.embedding_dim = embedding_dim
         self.task_num = task_num
-        self.embedding_layer_dict = self.create_embedding_layer(feature_map)
+        self.embedding_layer = self.create_embedding_layer(vocab_size)
 
         self.epnet = EPNet(gate_hidden_dim, embedding_dim, self.feature_map)
         self.ppnet = PPNet(gate_hidden_dim, dnn_hidden_units, task_num)
 
-    def create_embedding_layer(self, feature_map):
-        embedding_layer_dict = {}
-        for name, feature_column in feature_map.items():
-            if isinstance(feature_column, SparseColumn) or isinstance(feature_column, VarLenColumn):
-                embedding_layer = keras.layers.Embedding(input_dim=feature_column.vocabulary_size,
-                                                         output_dim=self.embedding_dim)
-                embedding_layer_dict[name] = embedding_layer
-
-        return embedding_layer_dict
+    def create_embedding_layer(self, vocab_size):
+        embedding_layer = keras.layers.Embedding(input_dim=vocab_size,
+                                                    output_dim=self.embedding_dim)
+        return embedding_layer
 
     def embedding_lookup(self, inputs):
         embedding_dict = {}
         for name, feature_column in self.feature_map.items():
-            embedding = self.embedding_layer_dict[name](inputs[name])
+            embedding = self.embedding_layer(inputs[name])
             embedding_dict[name] = tf.squeeze(embedding, axis=1)
 
         return embedding_dict
@@ -133,20 +128,3 @@ class PEPNet(keras.Model):
         logits = self.ppnet(epnet_embedding, user_embedding, item_embedding)
 
         return logits
-
-
-if __name__ == "__main__":
-    feature_map = {"mid": SparseColumn("mid", 10, 4, "user"), 
-                       "iid": SparseColumn("iid", 10, 4, "item"),
-                       "src": SparseColumn("src", 10, 4, "domain")}
-
-    inputs = {"mid": tf.constant([[1], [2]]),
-              "iid": tf.constant([[3], [4]]),
-              "src": tf.constant([[5], [6]])}
-    
-
-    model = PEPNet(feature_map=feature_map, embedding_dim=4, task_num=2, dnn_hidden_units=[64, 64, 64], gate_hidden_dim=64)
-
-    output = model(inputs)
-
-    print(output)

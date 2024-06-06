@@ -8,8 +8,6 @@ class SparseColumn:
         group_name: 特征组
         """
         self.name = name
-        self.vocabulary_size = vocabulary_size
-        self.embedding_dim = embedding_dim
         self.group_name = group_name
 
 
@@ -28,3 +26,17 @@ class VarLenColumn:
         self.group_name = group_name
         self.embedding_dim = embedding_dim
 
+
+
+def get_feature_map_from_yaml_config(yaml_config):
+    feature_map = {}
+
+    for idx in range(len(yaml_config["feature_map"]["name"])):
+        name = yaml_config["feature_map"]["name"][idx]
+        type = yaml_config["feature_map"]["type"][idx]
+        group = yaml_config["feature_map"]["group"][idx]
+
+        if type == "sparse":
+            feature_map[name] = SparseColumn(name, group)
+
+    return feature_map

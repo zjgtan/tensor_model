@@ -1,6 +1,8 @@
 import tensorflow as tf
 import joblib
 from sklearn.metrics import roc_auc_score
+from model.feature_column import *
+from model.PEPNet import PEPNet
 import yaml
 
 
@@ -17,6 +19,15 @@ alicpp数据格式
 
 if __name__ == "__main__":
     with open("../config/pepnet.yaml", "r") as fd:
-        model_config = yaml.safe_load(fd)
+        yaml_config = yaml.safe_load(fd)
 
-    print(model_config)
+    feature_map = get_feature_map_from_yaml_config(yaml_config)
+
+    # 定义模型结构
+
+    net = PEPNet(feature_map, yaml_config["embedding_dim"], yaml_config["task_num"], yaml_config["dnn_hidden_units"], yaml_config["gate_hidden_dim"])
+
+
+    # 定义输入输出数据流
+
+
