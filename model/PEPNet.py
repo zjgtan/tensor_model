@@ -98,6 +98,8 @@ class PEPNet(keras.Model):
         embedding_dict = {}
         for name, feature_column in self.feature_map.items():
             embedding = self.embedding_layer(inputs[name])
+            if isinstance(feature_column, VarLenColumn):
+                embedding = tf.reduce_sum(embedding, axis=1)
             embedding_dict[name] = tf.squeeze(embedding, axis=1)
 
         return embedding_dict
@@ -129,3 +131,16 @@ class PEPNet(keras.Model):
         logits = self.ppnet(epnet_embedding, user_embedding, item_embedding)
 
         return logits
+
+
+if __name__ == "__main__":
+    feature_map = {"mid": SparseColumn("mid", "user"),
+                   "iid": SparseColumn("iid", "item"),
+                   "scene": SparseColumn("scene", "domain")}
+
+    net = PEPNet(feature_map=feature_map,
+                 vocab_size=10,
+                 embedding_dim=4,
+                 task_num=2,
+                 dnn_hidden_units=[12, 12, 12],
+                 gate_hidden_dim=12)
