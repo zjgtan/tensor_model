@@ -25,7 +25,7 @@ if __name__ == "__main__":
 
     # 定义模型结构
 
-    net = PEPNet(feature_map, yaml_config["embedding_dim"], yaml_config["task_num"], yaml_config["dnn_hidden_units"], yaml_config["gate_hidden_dim"])
+    net = PEPNet(feature_map, yaml_config["vocab_size"], yaml_config["embedding_dim"], yaml_config["task_num"], yaml_config["dnn_hidden_units"], yaml_config["gate_hidden_dim"])
 
 
     # 定义输入输出数据流
