@@ -29,6 +29,7 @@ uses_columns = [col for col in sparse_columns] + ['D' + col for col in dense_col
 max_id = 0
 
 def preprocess_data(mode='train'):
+    global max_id
     assert mode in ['train', 'test']
     if mode == "test" and not os.path.exists(write_features_map_path):
         print("Error! Please run the train mode first!")
