@@ -18,7 +18,7 @@ alicpp数据格式
 
 
 if __name__ == "__main__":
-    with open("../config/pepnet.yaml", "r") as fd:
+    with open("./config/pepnet.yaml", "r") as fd:
         yaml_config = yaml.safe_load(fd)
 
     feature_map = get_feature_map_from_yaml_config(yaml_config)
