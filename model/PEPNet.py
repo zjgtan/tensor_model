@@ -1,3 +1,5 @@
+import sys
+sys.path.append(".")
 import tensorflow as tf
 from tensorflow import keras
 from model.feature_column import *
