@@ -72,7 +72,7 @@ def preprocess_data(mode='train'):
 
                 tf_record = {}
                 for idx, slot in enumerate(sparse_columns):
-                    if slot not in feat_dict:
+                    if slot in feat_dict:
                         tf_record[slot] = tf.train.Feature(int64_list=tf.train.Int64List(value=feat_dict[slot]))
                     else:
                         tf_record[slot] = tf.train.Feature(int64_list=tf.train.Int64List(value=[padding_idx + idx]))
