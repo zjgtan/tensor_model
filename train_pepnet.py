@@ -65,7 +65,7 @@ if __name__ == "__main__":
     optimizer = tf.keras.optimizers.Adam()
 
     # 定义输入输出数据流
-    alicpp_train_set = tf.data.TFRecordDataset(["../mtl/train.tfrecord"]).map(lambda record: parse_example(record, feature_map))
+    alicpp_train_set = tf.data.TFRecordDataset(["../mtl/train.tfrecord"]).map(lambda record: parse_example(record, feature_map)).batch(100)
 
     for epoch in range(yaml_config["epoch"]):
         train_epoch(net, alicpp_train_set, optimizer)
