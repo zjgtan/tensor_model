@@ -32,7 +32,7 @@ def parse_example(record, feature_map):
     parsed_example = tf.io.parse_single_example(record, schema)
     for feat, col in feature_map.items():
         if isinstance(col, VarLenColumn):
-            parsed_example[feat] = tf.ragged.stack([parsed_example[feat]], axis=0)
+            parsed_example[feat] = tf.ragged.stack([[parsed_example[feat]]], axis=0)
 
     return parsed_example
 
