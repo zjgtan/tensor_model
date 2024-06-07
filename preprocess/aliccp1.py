@@ -11,6 +11,7 @@ from tqdm import tqdm
 import tensorflow as tf
 from sklearn.preprocessing import MinMaxScaler
 from sklearn.model_selection import train_test_split
+import random
 
 random.seed(2022)
 np.random.seed(2022)
@@ -57,6 +58,8 @@ def preprocess_data(mode='train'):
             for line in tqdm(fr):
                 line_list = line.strip().split(',')
                 if line_list[1] == '0' and line_list[2] == '1':
+                    continue
+                if line_list[1] == '0' and random.random() > 0.1:
                     continue
                 feat_strs = line_list[5]
                 feat_dict = {}

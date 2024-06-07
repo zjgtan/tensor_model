@@ -1,3 +1,5 @@
+import os
+os.environ["CUDA_VISIBLE_DEVICES"] = '0'
 import tensorflow as tf
 import joblib
 from sklearn.metrics import roc_auc_score
@@ -23,6 +25,7 @@ def parse_example(record, feature_map):
         if isinstance(col, SparseColumn):
             schema[feat] = tf.io.FixedLenFeature((1, ), tf.int64)
         elif isinstance(col, VarLenColumn):
+            print(feat)
             schema[feat] = tf.io.RaggedFeature(tf.int64)
 
     schema["click"] = tf.io.FixedLenFeature((1,), tf.float32)
@@ -32,7 +35,7 @@ def parse_example(record, feature_map):
     parsed_example = tf.io.parse_single_example(record, schema)
     for feat, col in feature_map.items():
         if isinstance(col, VarLenColumn):
-            parsed_example[feat] = tf.ragged.stack([tf.ragged.stack([parsed_example[feat]], axis=0)], axis=0)
+            parsed_example[feat] = tf.ragged.stack([parsed_example[feat]], axis=0)
 
     return parsed_example
 
@@ -62,7 +65,9 @@ if __name__ == "__main__":
     optimizer = tf.keras.optimizers.Adam()
 
     # 定义输入输出数据流
-    alicpp_train_set = tf.data.TFRecordDataset(["../mtl/train.tfrecord"]).map(lambda record: parse_example(record, feature_map)).batch(yaml_config["batch_size"])
+    #alicpp_train_set = tf.data.TFRecordDataset(["../mtl/train.tfrecord"]).map(lambda record: parse_example(record, feature_map)).batch(yaml_config["batch_size"])
+    alicpp_train_set = tf.data.TFRecordDataset(["../mtl/train.tfrecord"]).map(lambda record: parse_example(record, feature_map), num_parallel_calls=10).apply(tf.data.experimental.dense_to_ragged_batch(batch_size=yaml_config["batch_size"]))
+
 
     for epoch in range(yaml_config["epoch"]):
         train_epoch(net, alicpp_train_set, optimizer)
