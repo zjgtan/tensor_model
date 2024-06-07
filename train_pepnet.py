@@ -41,8 +41,9 @@ def parse_example(record, feature_map):
 def train_epoch(model, dataset, optimizer):
 
     for idx, batch in enumerate(dataset):
-        if idx > 10: break
-        print(batch)
+        if idx > 1: break
+        for key, data in batch.items():
+            print(key, data)
         continue
         with tf.GradientTape() as tape:
             click_logits, conversion_logits = model(batch)
