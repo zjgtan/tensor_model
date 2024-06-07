@@ -57,6 +57,8 @@ def train_epoch(model, dataset, optimizer):
         if idx % 100 == 0:
             print(loss, click_auc)
 
+        idx += 1
+
 
 if __name__ == "__main__":
     with open("./config/mmoe.yaml", "r") as fd:
