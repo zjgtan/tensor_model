@@ -38,16 +38,12 @@ def parse_example(record, feature_map):
 def train_epoch(model, dataset, optimizer):
 
     for idx, batch in enumerate(dataset):
-        if idx > 1: break
-        for key, data in batch.items():
-            print(key, data)
-        continue
         with tf.GradientTape() as tape:
             click_logits, conversion_logits = model(batch)
             click_loss = tf.reduce_mean(tf.nn.sigmoid_cross_entropy_with_logits(labels=batch["click"], logits=click_logits))
             conversion_loss = tf.reduce_mean(tf.nn.sigmoid_cross_entropy_with_logits(labels=batch["conversion"], logits=conversion_logits))
 
-            loss = click_loss + conversion_logits
+            loss = click_loss + conversion_loss
 
         gradients = tape.gradient(loss, model.trainable_variables)
         optimizer.apply_gradients(zip(gradients, model.trainable_variables))
