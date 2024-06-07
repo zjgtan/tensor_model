@@ -4,7 +4,7 @@ from sklearn.metrics import roc_auc_score
 from model.feature_column import *
 from model.PEPNet import PEPNet
 import yaml
-import tqdm
+from tqdm import tqdm
 
 
 """
