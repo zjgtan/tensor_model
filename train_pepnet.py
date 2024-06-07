@@ -41,6 +41,9 @@ def parse_example(record, feature_map):
 def train_epoch(model, dataset, optimizer):
 
     for idx, batch in enumerate(dataset):
+        if idx > 10: break
+        print(batch)
+        continue
         with tf.GradientTape() as tape:
             click_logits, conversion_logits = model(batch)
             click_loss = tf.reduce_mean(tf.nn.sigmoid_cross_entropy_with_logits(labels=batch["click"], logits=click_logits))
@@ -64,7 +67,7 @@ if __name__ == "__main__":
     optimizer = tf.keras.optimizers.Adam()
 
     # 定义输入输出数据流
-    alicpp_train_set = tf.data.TFRecordDataset(["../mtl/train.tfrecord"]).map(lambda record: parse_example(record, feature_map)).batch(100)
+    alicpp_train_set = tf.data.TFRecordDataset(["../mtl/train.tfrecord"]).map(lambda record: parse_example(record, feature_map))
 
     for epoch in range(yaml_config["epoch"]):
         train_epoch(net, alicpp_train_set, optimizer)
