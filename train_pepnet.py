@@ -23,6 +23,10 @@ def parse_example(record, feature_map):
         elif isinstance(col, VarLenColumn):
             schema[feat] = tf.io.RaggedFeature(tf.int64)
 
+    schema["click"] = tf.io.FixedLenFeature((1,), tf.float32)
+    schema["conversion"] = tf.io.FixedLenFeature((1,), tf.float32)
+
+
     parsed_example = tf.io.parse_single_example(record, schema)
     for feat, col in feature_map.items():
         if isinstance(col, VarLenColumn):
@@ -34,12 +38,14 @@ def train_epoch(model, dataset, optimizer):
 
     for idx, batch in enumerate(dataset):
         with tf.GradientTape() as tape:
-            logits = 
+            click_logits, conversion_logits = model(batch)
+            click_loss = tf.reduce_mean(tf.nn.sigmoid_cross_entropy_with_logits(labels=batch["click"], logits=click_logits))
+            conversion_loss = tf.reduce_mean(tf.nn.sigmoid_cross_entropy_with_logits(labels=batch["conversion"], logits=conversion_logits))
 
-    
-    
+            loss = click_loss + conversion_logits
 
-
+        gradients = tape.gradient(loss, model.trainable_variables)
+        optimizer.apply_gradients(zip(gradients, model.trainable_variables))
 
 
 if __name__ == "__main__":
@@ -49,16 +55,17 @@ if __name__ == "__main__":
     feature_map = get_feature_map_from_yaml_config(yaml_config)
 
     # 定义模型结构
-
     net = PEPNet(feature_map, yaml_config["vocab_size"], yaml_config["embedding_dim"], yaml_config["task_num"], yaml_config["dnn_hidden_units"], yaml_config["gate_hidden_dim"])
 
+    optimizer = tf.keras.optimizers.Adam()
 
     # 定义输入输出数据流
     alicpp_train_set = tf.data.TFRecordDataset(["../mtl/train.tfrecord"]).map(lambda record: parse_example(record, feature_map)).batch(100)
 
-    for idx, batch in enumerate(alicpp_train_set):
-        print(batch)
-        break
+    for epoch in yaml_config["epoch"]:
+        train_epoch(net, alicpp_train_set, optimizer)
+
+
 
 
 
