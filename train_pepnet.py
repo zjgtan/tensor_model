@@ -25,7 +25,6 @@ def parse_example(record, feature_map):
         if isinstance(col, SparseColumn):
             schema[feat] = tf.io.FixedLenFeature((1, ), tf.int64)
         elif isinstance(col, VarLenColumn):
-            print(feat)
             schema[feat] = tf.io.RaggedFeature(tf.int64)
 
     schema["click"] = tf.io.FixedLenFeature((1,), tf.float32)
@@ -40,17 +39,24 @@ def parse_example(record, feature_map):
     return parsed_example
 
 def train_epoch(model, dataset, optimizer):
-
+    idx = 0
     for batch in tqdm(dataset):
         with tf.GradientTape() as tape:
             click_logits, conversion_logits = model(batch)
             click_loss = tf.reduce_mean(tf.nn.sigmoid_cross_entropy_with_logits(labels=batch["click"], logits=click_logits))
             conversion_loss = tf.reduce_mean(tf.nn.sigmoid_cross_entropy_with_logits(labels=batch["conversion"], logits=conversion_logits))
 
+            click_auc = roc_auc_score(batch["click"], tf.nn.sigmoid(click_logits))
+
             loss = click_loss + conversion_loss
 
         gradients = tape.gradient(loss, model.trainable_variables)
         optimizer.apply_gradients(zip(gradients, model.trainable_variables))
+        
+        if idx % 100 == 0:
+            print(loss, click_auc)
+
+        idx += 1
 
 
 if __name__ == "__main__":
@@ -66,7 +72,7 @@ if __name__ == "__main__":
 
     # 定义输入输出数据流
     #alicpp_train_set = tf.data.TFRecordDataset(["../mtl/train.tfrecord"]).map(lambda record: parse_example(record, feature_map)).batch(yaml_config["batch_size"])
-    alicpp_train_set = tf.data.TFRecordDataset(["../mtl/train.tfrecord"]).map(lambda record: parse_example(record, feature_map), num_parallel_calls=10).apply(tf.data.experimental.dense_to_ragged_batch(batch_size=yaml_config["batch_size"]))
+    alicpp_train_set = tf.data.TFRecordDataset(["../mtl/train.tfrecord"]).map(lambda record: parse_example(record, feature_map), num_parallel_calls=10).apply(tf.data.experimental.dense_to_ragged_batch(batch_size=yaml_config["batch_size"])).prefetch(10)
 
 
     for epoch in range(yaml_config["epoch"]):
