@@ -32,11 +32,13 @@ def parse_example(record, feature_map):
     parsed_example = tf.io.parse_single_example(record, schema)
     for feat, col in feature_map.items():
         if isinstance(col, VarLenColumn):
-            parsed_example[feat] = tf.ragged.stack([parsed_example[feat]], axis=0)
+            parsed_example[feat] = tf.ragged.stack([tf.ragged.stack([parsed_example[feat]], axis=0)], axis=0)
 
     return parsed_example
 
 def train_epoch(model, dataset, optimizer):
+
+    idx = 0
 
     for batch in tqdm(dataset):
         with tf.GradientTape() as tape:
@@ -44,10 +46,16 @@ def train_epoch(model, dataset, optimizer):
             click_loss = tf.reduce_mean(tf.nn.sigmoid_cross_entropy_with_logits(labels=batch["click"], logits=click_logits))
             conversion_loss = tf.reduce_mean(tf.nn.sigmoid_cross_entropy_with_logits(labels=batch["conversion"], logits=conversion_logits))
 
+
+            click_auc = roc_auc_score(batch["click"], tf.nn.sigmoid(click_logits))
+
             loss = click_loss + conversion_loss
 
         gradients = tape.gradient(loss, model.trainable_variables)
         optimizer.apply_gradients(zip(gradients, model.trainable_variables))
+
+        if idx % 100 == 0:
+            print(loss, click_auc)
 
 
 if __name__ == "__main__":
