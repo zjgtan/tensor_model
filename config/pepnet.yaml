@@ -8,3 +8,4 @@ dnn_hidden_units: [64, 64, 64]
 gate_hidden_dim: 64
 vocab_size: 10091403
 epoch: 1
+batch_size: 1024

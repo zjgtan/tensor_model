@@ -100,7 +100,6 @@ class PEPNet(keras.Model):
         embedding_dict = {}
         for name, feature_column in self.feature_map.items():
             embedding = self.embedding_layer(inputs[name])
-            print(name, embedding)
             if isinstance(feature_column, VarLenColumn):
                 embedding = tf.reduce_sum(embedding, axis=2).to_tensor()
             embedding_dict[name] = tf.squeeze(embedding, axis=1)
