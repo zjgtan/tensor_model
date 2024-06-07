@@ -18,10 +18,14 @@ alicpp数据格式
 def parse_example(record, feature_map):
     schema = {}
     for feat, col in feature_map.items():
+
+        schema[feat] = tf.io.RaggedFeature(tf.int64)
+        '''
         if isinstance(col, SparseColumn):
             schema[feat] = tf.io.FixedLenFeature((1, ), tf.int64)
         elif isinstance(col, VarLenColumn):
             schema[feat] = tf.io.RaggedFeature(tf.int64)
+        '''
 
     schema["click"] = tf.io.FixedLenFeature((1,), tf.float32)
     schema["conversion"] = tf.io.FixedLenFeature((1,), tf.float32)
