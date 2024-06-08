@@ -10,4 +10,4 @@ gate_hidden_units: [64, 3]
 tower_hidden_units: [64, 64, 1]
 vocab_size: 10091403
 epoch: 1
-batch_size: 1024
+batch_size: 10240
