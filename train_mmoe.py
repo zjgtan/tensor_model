@@ -41,16 +41,18 @@ def train_epoch(model, dataset, optimizer):
     idx = 0
     for batch in tqdm(dataset):
         with tf.GradientTape() as tape:
-            click_logits, conversion_logits = model(batch)
+            click_logits = model(batch)
             click_loss = tf.reduce_mean(tf.nn.sigmoid_cross_entropy_with_logits(labels=batch["click"], logits=click_logits))
-            conversion_loss = tf.reduce_mean(tf.nn.sigmoid_cross_entropy_with_logits(labels=batch["conversion"], logits=conversion_logits))
+            #conversion_loss = tf.reduce_mean(tf.nn.sigmoid_cross_entropy_with_logits(labels=batch["conversion"], logits=conversion_logits))
             try:
                 click_auc = roc_auc_score(batch["click"], tf.nn.sigmoid(click_logits))
-                conversion_auc = roc_auc_score(batch["conversion"], tf.nn.sigmoid(conversion_logits))
+                conversion_auc = 0
+                #conversion_auc = roc_auc_score(batch["conversion"], tf.nn.sigmoid(conversion_logits))
             except:
                 click_auc, conversion_auc = 0, 0
 
-            loss = click_loss + conversion_loss
+            #loss = click_loss + conversion_loss
+            loss = click_loss
 
         gradients = tape.gradient(loss, model.trainable_variables)
         optimizer.apply_gradients(zip(gradients, model.trainable_variables))
@@ -64,22 +66,23 @@ def eval(model, dataset):
     click_logits_list, conversion_logits_list, click_list, conversion_list = [], [], [], []
 
     for batch in tqdm(dataset):
-        click_logits, conversion_logits = model(batch)
+        #click_logits, conversion_logits = model(batch)
+        click_logits = model(batch)
         click_logits_list.append(click_logits)
-        conversion_logits_list.append(conversion_logits)
+        #conversion_logits_list.append(conversion_logits)
         click_list.append(batch["click"])
-        conversion_list.append(batch["conversion"])
+        #conversion_list.append(batch["conversion"])
 
 
     all_click_logits = tf.concat(click_logits_list, axis=0)
-    all_conversion_logits = tf.concat(conversion_logits_list, axis=0)
+    #all_conversion_logits = tf.concat(conversion_logits_list, axis=0)
     all_click = tf.concat(click_list, axis=0)
-    all_conversion = tf.concat(conversion_list, axis=0)
+    #all_conversion = tf.concat(conversion_list, axis=0)
 
     click_auc = roc_auc_score(all_click, tf.nn.sigmoid(all_click_logits))
-    conversion_auc = roc_auc_score(all_conversion, tf.nn.sigmoid(all_conversion_logits))
+    #conversion_auc = roc_auc_score(all_conversion, tf.nn.sigmoid(all_conversion_logits))
 
-    print("test: ", click_auc, conversion_auc)
+    print("test: ", click_auc)
         
 
 
