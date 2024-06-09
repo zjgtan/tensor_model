@@ -41,11 +41,11 @@ def train_epoch(model, dataset, optimizer):
     idx = 0
     for batch in tqdm(dataset):
         with tf.GradientTape() as tape:
-            click_logits = model(batch)
-            click_loss = tf.reduce_mean(tf.nn.sigmoid_cross_entropy_with_logits(labels=batch["click"], logits=click_logits))
+            output_logits = model(batch)
+            click_loss = tf.reduce_mean(tf.nn.sigmoid_cross_entropy_with_logits(labels=batch["click"], logits=output_logits[0]))
             #conversion_loss = tf.reduce_mean(tf.nn.sigmoid_cross_entropy_with_logits(labels=batch["conversion"], logits=conversion_logits))
             try:
-                click_auc = roc_auc_score(batch["click"], tf.nn.sigmoid(click_logits))
+                click_auc = roc_auc_score(batch["click"], tf.nn.sigmoid(output_logits[0]))
                 conversion_auc = 0
                 #conversion_auc = roc_auc_score(batch["conversion"], tf.nn.sigmoid(conversion_logits))
             except:
@@ -67,8 +67,8 @@ def eval(model, dataset):
 
     for batch in tqdm(dataset):
         #click_logits, conversion_logits = model(batch)
-        click_logits = model(batch)
-        click_logits_list.append(click_logits)
+        output_logits = model(batch)
+        click_logits_list.append(output_logits[0])
         #conversion_logits_list.append(conversion_logits)
         click_list.append(batch["click"])
         #conversion_list.append(batch["conversion"])
