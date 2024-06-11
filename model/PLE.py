@@ -25,7 +25,7 @@ class CGC(keras.Model):
             self.shared_experts.append(self.get_mlp_block(expert_hidden_units, ["relu"] * len(expert_hidden_units), "level_{}_sa_{}".format(level_id, expert_idx)))
 
         self.specific_gates = []
-        for task_idx in range(self.task_num + 1):
+        for task_idx in range(self.task_num):
             self.specific_gates.append(self.get_mlp_block(gate_hidden_units + [self.num_specific_experts + self.num_shared_experts], 
                                                           ["relu"] * len(gate_hidden_units) + ["softmax"], "level_{}_spg_{}".format(level_id, task_idx)))
 
