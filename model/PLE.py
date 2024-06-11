@@ -7,13 +7,14 @@ from model.feature_column import *
 
 
 class CGC(keras.Model):
-    def __init__(self, num_specific_experts, num_shared_experts, expert_hidden_units, gate_hidden_units, task_num, level_id):
+    def __init__(self, num_specific_experts, num_shared_experts, expert_hidden_units, gate_hidden_units, task_num, level_id, is_last):
         super().__init__()
         self.num_specific_experts = num_specific_experts
         self.num_shared_experts = num_shared_experts
         self.expert_hidden_units = expert_hidden_units
         self.gate_hidden_units = gate_hidden_units
         self.task_num = task_num
+        self.is_last = is_last
 
         self.specific_experts = []
         for task_idx in range(task_num):
@@ -29,8 +30,9 @@ class CGC(keras.Model):
             self.specific_gates.append(self.get_mlp_block(gate_hidden_units + [self.num_specific_experts + self.num_shared_experts], 
                                                           ["relu"] * len(gate_hidden_units) + ["softmax"], "level_{}_spg_{}".format(level_id, task_idx)))
 
-        self.shared_gates = []
-        self.shared_gates.append(self.get_mlp_block(gate_hidden_units + [self.num_specific_experts * self.task_num + self.num_shared_experts], 
+        if is_last != True:
+            self.shared_gates = []
+            self.shared_gates.append(self.get_mlp_block(gate_hidden_units + [self.num_specific_experts * self.task_num + self.num_shared_experts], 
                                                     ["relu"] * len(gate_hidden_units) + ["softmax"], "level_{}_shg".format(level_id)))
         
 
@@ -68,10 +70,11 @@ class CGC(keras.Model):
 
             cgc_outputs.append(merged_experts)
 
-        # shared gate
-        merged_experts = tf.concat([e[:, tf.newaxis, :] for e in specific_expert_outputs + shared_expert_outputs], axis=1)
-        merged_experts = tf.squeeze(tf.matmul(merged_experts, tf.expand_dims(shared_gate_outputs[0], axis=-1), transpose_a=True), axis=-1)
-        cgc_outputs.append(merged_experts)
+        if self.is_last != True:
+            # shared gate
+            merged_experts = tf.concat([e[:, tf.newaxis, :] for e in specific_expert_outputs + shared_expert_outputs], axis=1)
+            merged_experts = tf.squeeze(tf.matmul(merged_experts, tf.expand_dims(shared_gate_outputs[0], axis=-1), transpose_a=True), axis=-1)
+            cgc_outputs.append(merged_experts)
 
         return cgc_outputs
 
@@ -95,7 +98,8 @@ class PLE(keras.Model):
 
         self.cgc_layers = []
         for level in range(num_level):
-            self.cgc_layers.append(CGC(self.num_specific_experts, self.num_shared_experts, self.expert_hidden_units, self.gate_hidden_units, self.task_num, level))
+            is_last = (level == (self.num_level - 1))
+            self.cgc_layers.append(CGC(self.num_specific_experts, self.num_shared_experts, self.expert_hidden_units, self.gate_hidden_units, self.task_num, level, is_last))
 
         self.towers = [self.get_mlp_block(tower_hidden_units, ["relu"] * (len(tower_hidden_units) - 1) + ["linear"]) for _ in range(task_num)]
 
