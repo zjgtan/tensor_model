@@ -37,7 +37,7 @@ class CGC(keras.Model):
     def get_mlp_block(self, hidden_units, activations, name):
         mlp = keras.Sequential()
         for idx in range(len(hidden_units)):
-            mlp.add(keras.layers.Dense(hidden_units[idx], activation=activations[idx], name=name+"_idx"))
+            mlp.add(keras.layers.Dense(hidden_units[idx], activation=activations[idx], name=name+"_{}".format(idx)))
 
         return mlp    
 
