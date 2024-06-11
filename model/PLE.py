@@ -60,8 +60,6 @@ class CGC(keras.Model):
             specific_gate_outputs.append(self.specific_gates[task_idx](inputs[task_idx]))
 
 
-        shared_gate_outputs = []
-        shared_gate_outputs.append(self.shared_gates[0](inputs[-1]))
 
         cgc_outputs = []
         for task_idx in range(self.task_num):
@@ -72,6 +70,8 @@ class CGC(keras.Model):
 
         if self.is_last != True:
             # shared gate
+            shared_gate_outputs = []
+            shared_gate_outputs.append(self.shared_gates[0](inputs[-1]))
             merged_experts = tf.concat([e[:, tf.newaxis, :] for e in specific_expert_outputs + shared_expert_outputs], axis=1)
             merged_experts = tf.squeeze(tf.matmul(merged_experts, tf.expand_dims(shared_gate_outputs[0], axis=-1), transpose_a=True), axis=-1)
             cgc_outputs.append(merged_experts)
