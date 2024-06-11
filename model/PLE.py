@@ -136,7 +136,7 @@ class PLE(keras.Model):
         concated_embedding = self.concat_embedding(embedding_dict)
 
         cgc_inputs = [concated_embedding] * (self.task_num + 1)
-        cpc_outputs = cgc_inputs
+        cgc_outputs = cgc_inputs
         for level in range(self.num_level):
             cgc_outputs = self.cgc_layers[level](cgc_inputs)
             cgc_inputs = cgc_outputs
@@ -144,7 +144,7 @@ class PLE(keras.Model):
 
         multi_task_logits = []
         for idx in range(self.task_num):
-            tower_logits = self.towers[idx](cpc_outputs[idx])
+            tower_logits = self.towers[idx](cgc_outputs[idx])
             multi_task_logits.append(tower_logits)
 
         return multi_task_logits

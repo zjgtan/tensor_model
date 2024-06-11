@@ -9,7 +9,7 @@ num_shared_experts: 3
 expert_hidden_units: [512, 126]
 gate_hidden_units: [32]
 tower_hidden_units: [128, 64, 1]
-num_level: 2
+num_level: 1
 vocab_size: 10091403
 epoch: 1
 batch_size: 10240
