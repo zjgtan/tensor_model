@@ -161,8 +161,8 @@ if __name__ == "__main__":
                 num_shared_experts=2,
                 expert_hidden_units=[32, 32],
                 gate_hidden_units=[32],
-                tower_hidden_units=[32, 1],
-                num_level=2)
+                num_level=2,
+                tower_hidden_units=[32, 1])
         
     batch = {"mid": tf.constant([[1], [2]]),
              "iid": tf.constant([[1], [2]]),

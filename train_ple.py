@@ -98,8 +98,8 @@ if __name__ == "__main__":
               yaml_config["num_shared_experts"], 
               yaml_config["expert_hidden_units"], 
               yaml_config["gate_hidden_units"], 
-              yaml_config["tower_hidden_units"],
-              yaml_config["num_level"])
+              yaml_config["num_level"],
+              yaml_config["tower_hidden_units"])
 
     optimizer = tf.keras.optimizers.Adam()
 
