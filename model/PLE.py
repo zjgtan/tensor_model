@@ -7,7 +7,7 @@ from model.feature_column import *
 
 
 class CGC(keras.Model):
-    def __init__(self, num_specific_experts, num_shared_experts, expert_hidden_units, gate_hidden_units, task_num):
+    def __init__(self, num_specific_experts, num_shared_experts, expert_hidden_units, gate_hidden_units, task_num, level_id):
         super().__init__()
         self.num_specific_experts = num_specific_experts
         self.num_shared_experts = num_shared_experts
@@ -16,26 +16,28 @@ class CGC(keras.Model):
         self.task_num = task_num
 
         self.specific_experts = []
-        for _ in range(task_num):
-            for _ in range(self.num_specific_experts):
-                self.specific_experts.append(self.get_mlp_block(expert_hidden_units, ["relu"] * len(expert_hidden_units)))
+        for task_idx in range(task_num):
+            for expert_idx in range(self.num_specific_experts):
+                self.specific_experts.append(self.get_mlp_block(expert_hidden_units, ["relu"] * len(expert_hidden_units), "level_{}_task_{}_sp_{}".format(level_id, task_idx, expert_idx)))
 
         self.shared_experts = []
-        for _ in range(self.num_shared_experts):
-            self.shared_experts.append(self.get_mlp_block(expert_hidden_units, ["relu"] * len(expert_hidden_units)))
+        for expert_idx in range(self.num_shared_experts):
+            self.shared_experts.append(self.get_mlp_block(expert_hidden_units, ["relu"] * len(expert_hidden_units), "level_{}_sa_{}".format(level_id, expert_idx)))
 
         self.specific_gates = []
-        for _ in range(self.task_num + 1):
-            self.specific_gates.append(self.get_mlp_block(gate_hidden_units + [self.num_specific_experts + self.num_shared_experts], ["relu"] * len(gate_hidden_units) + ["softmax"]))
+        for task_idx in range(self.task_num + 1):
+            self.specific_gates.append(self.get_mlp_block(gate_hidden_units + [self.num_specific_experts + self.num_shared_experts], 
+                                                          ["relu"] * len(gate_hidden_units) + ["softmax"], "level_{}_spg_{}".format(level_id, task_idx)))
 
         self.shared_gates = []
-        self.shared_gates.append(self.get_mlp_block(gate_hidden_units + [self.num_specific_experts * self.task_num + self.num_shared_experts], ["relu"] * len(gate_hidden_units) + ["softmax"]))
+        self.shared_gates.append(self.get_mlp_block(gate_hidden_units + [self.num_specific_experts * self.task_num + self.num_shared_experts], 
+                                                    ["relu"] * len(gate_hidden_units) + ["softmax"], "level_{}_shg".format(level_id)))
         
 
-    def get_mlp_block(self, hidden_units, activations):
+    def get_mlp_block(self, hidden_units, activations, name):
         mlp = keras.Sequential()
         for idx in range(len(hidden_units)):
-            mlp.add(keras.layers.Dense(hidden_units[idx], activation=activations[idx]))
+            mlp.add(keras.layers.Dense(hidden_units[idx], activation=activations[idx], name=name+"_idx"))
 
         return mlp    
 
@@ -92,8 +94,8 @@ class PLE(keras.Model):
         self.embedding_layer = self.create_embedding_layer(vocab_size)
 
         self.cgc_layers = []
-        for _ in range(num_level):
-            self.cgc_layers.append(CGC(self.num_specific_experts, self.num_shared_experts, self.expert_hidden_units, self.gate_hidden_units, self.task_num))
+        for level in range(num_level):
+            self.cgc_layers.append(CGC(self.num_specific_experts, self.num_shared_experts, self.expert_hidden_units, self.gate_hidden_units, self.task_num, level))
 
         self.towers = [self.get_mlp_block(tower_hidden_units, ["relu"] * (len(tower_hidden_units) - 1) + ["linear"]) for _ in range(task_num)]
 
